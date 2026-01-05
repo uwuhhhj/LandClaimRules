@@ -6,3 +6,18 @@ authors: [ Loliiiico ]
 description: Control LandClaim Rules
 depend:
   - Lands
+commands:
+  landclaimrules:
+    description: Manage LandClaimRules scans
+    usage: /<command> <scan|disconnected>
+    permission: landclaimrules.admin
+permissions:
+  landclaimrules.admin:
+    description: Allows managing LandClaimRules
+    default: op
+  landclaimrules.bypass.antihollow:
+    description: Bypass anti-hollow rule
+    default: op
+  landclaimrules.bypass.dualring:
+    description: Bypass dual-ring support rule
+    default: op
