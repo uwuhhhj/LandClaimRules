@@ -2,6 +2,7 @@ package io.github.loliiiico.rules;
 
 import me.angeschossen.lands.api.land.ChunkCoordinate;
 import me.angeschossen.lands.api.land.Land;
+import me.angeschossen.lands.api.nation.Nation;
 import org.bukkit.World;
 
 import java.util.Collection;
@@ -122,6 +123,29 @@ public final class AntiHollowClaimRule {
                     if (x > maxX) maxX = x;
                     if (z < minZ) minZ = z;
                     if (z > maxZ) maxZ = z;
+                }
+            }
+        }
+
+        if (!first) {
+            Nation nation = land.getNation();
+            if (nation != null) {
+                // Treat same-nation claims inside this land's bounds as filled to avoid false hollow hits.
+                for (Land member : nation.getLands()) {
+                    if (member == land) {
+                        continue;
+                    }
+                    Collection<? extends ChunkCoordinate> memberChunks = member.getChunks(world);
+                    if (memberChunks == null) {
+                        continue;
+                    }
+                    for (ChunkCoordinate chunk : memberChunks) {
+                        int x = chunk.getX();
+                        int z = chunk.getZ();
+                        if (x >= minX && x <= maxX && z >= minZ && z <= maxZ) {
+                            claimed.add(pack(x, z));
+                        }
+                    }
                 }
             }
         }
