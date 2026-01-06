@@ -37,6 +37,15 @@ public final class DualRingSupportRule {
             return new Result(true, 0, 0);
         }
 
+        int totalClaimed = 0;
+        java.util.Collection<?> chunks = container.getChunks();
+        if (chunks != null) {
+            totalClaimed = chunks.size();
+        }
+        if (totalClaimed < 10) {
+            return new Result(true, 0, 0);
+        }
+
         int ring1Claimed = 0;
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
