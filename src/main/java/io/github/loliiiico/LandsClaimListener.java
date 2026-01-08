@@ -53,7 +53,7 @@ public final class LandsClaimListener implements Listener {
 
                 if (player != null) {
                     String sampleHole = hollowRes.hasSampleHole
-                            ? hollowRes.sampleHoleX + "," + hollowRes.sampleHoleZ
+                            ? ((hollowRes.sampleHoleX << 4) + "," + (hollowRes.sampleHoleZ << 4))
                             : "n/a";
                     player.sendMessage(config.formatAntiHollowDenied(hollowRes.holesCached, sampleHole));
                 }
