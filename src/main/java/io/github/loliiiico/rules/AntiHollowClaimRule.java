@@ -17,11 +17,17 @@ public final class AntiHollowClaimRule {
         public final boolean allowed;
         public final boolean cacheHit;
         public final int holesCached;
+        public final boolean hasSampleHole;
+        public final int sampleHoleX;
+        public final int sampleHoleZ;
 
-        public Result(boolean allowed, boolean cacheHit, int holesCached) {
+        public Result(boolean allowed, boolean cacheHit, int holesCached, boolean hasSampleHole, int sampleHoleX, int sampleHoleZ) {
             this.allowed = allowed;
             this.cacheHit = cacheHit;
             this.holesCached = holesCached;
+            this.hasSampleHole = hasSampleHole;
+            this.sampleHoleX = sampleHoleX;
+            this.sampleHoleZ = sampleHoleZ;
         }
     }
 
@@ -69,10 +75,16 @@ public final class AntiHollowClaimRule {
     private static final class CacheEntry {
         private final int holes;
         private final HashSet<Long> holeCells;
+        private final boolean hasSampleHole;
+        private final int sampleHoleX;
+        private final int sampleHoleZ;
 
-        private CacheEntry(int holes, HashSet<Long> holeCells) {
+        private CacheEntry(int holes, HashSet<Long> holeCells, boolean hasSampleHole, int sampleHoleX, int sampleHoleZ) {
             this.holes = holes;
             this.holeCells = holeCells;
+            this.hasSampleHole = hasSampleHole;
+            this.sampleHoleX = sampleHoleX;
+            this.sampleHoleZ = sampleHoleZ;
         }
     }
 
@@ -85,18 +97,18 @@ public final class AntiHollowClaimRule {
     public Result checkCached(CacheKey key, int cx, int cz) {
         CacheEntry entry = cache.get(key);
         if (entry == null) {
-            return new Result(true, false, 0);
+            return new Result(true, false, 0, false, 0, 0);
         }
 
         if (entry.holes == 0) {
-            return new Result(true, true, 0);
+            return new Result(true, true, 0, false, 0, 0);
         }
 
         if (entry.holeCells != null && entry.holeCells.contains(pack(cx, cz))) {
-            return new Result(true, true, entry.holes);
+            return new Result(true, true, entry.holes, entry.hasSampleHole, entry.sampleHoleX, entry.sampleHoleZ);
         }
 
-        return new Result(false, true, entry.holes);
+        return new Result(false, true, entry.holes, entry.hasSampleHole, entry.sampleHoleX, entry.sampleHoleZ);
     }
 
     public Snapshot snapshot(Land land, World world) {
@@ -155,7 +167,7 @@ public final class AntiHollowClaimRule {
 
     public void updateCache(CacheKey key, Snapshot snapshot) {
         if (snapshot == null || snapshot.empty) {
-            cache.put(key, new CacheEntry(0, new HashSet<>()));
+            cache.put(key, new CacheEntry(0, new HashSet<>(), false, 0, 0));
             return;
         }
 
@@ -206,6 +218,9 @@ public final class AntiHollowClaimRule {
 
         int holes = 0;
         HashSet<Long> holeCells = new HashSet<>();
+        boolean hasSampleHole = false;
+        int sampleHoleX = 0;
+        int sampleHoleZ = 0;
         for (int z = minZExp; z <= maxZExp; z++) {
             for (int x = minXExp; x <= maxXExp; x++) {
                 long key = pack(x, z);
@@ -214,12 +229,17 @@ public final class AntiHollowClaimRule {
                     if (!outside[idx]) {
                         holes++;
                         holeCells.add(key);
+                        if (!hasSampleHole) {
+                            hasSampleHole = true;
+                            sampleHoleX = x;
+                            sampleHoleZ = z;
+                        }
                     }
                 }
             }
         }
 
-        return new CacheEntry(holes, holeCells);
+        return new CacheEntry(holes, holeCells, hasSampleHole, sampleHoleX, sampleHoleZ);
     }
 
     private static int tryEnqueue(

@@ -52,7 +52,10 @@ public final class LandsClaimListener implements Listener {
                 event.setCancelled(true);
 
                 if (player != null) {
-                    player.sendMessage(config.formatAntiHollowDenied(hollowRes.holesCached));
+                    String sampleHole = hollowRes.hasSampleHole
+                            ? hollowRes.sampleHoleX + "," + hollowRes.sampleHoleZ
+                            : "n/a";
+                    player.sendMessage(config.formatAntiHollowDenied(hollowRes.holesCached, sampleHole));
                 }
 
                 plugin.getLogger().info("[DENY AntiHollowClaim] land=" + event.getLand().getName()

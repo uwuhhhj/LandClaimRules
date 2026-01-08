@@ -7,7 +7,7 @@ rules:
 
 messages:
   dualRingDenied: "&c圈地失败：支撑不足（3x3 已圈 {ring1}/{need3x3} 还差 {lack3x3}，5x5 已圈 {ring12}/{need5x5} 还差 {lack5x5}）。"
-  antiHollowDenied: "&c圈地失败：存在空心区域（缓存空心数量={holes}），请先填补。"
+  antiHollowDenied: "&c圈地失败：存在空心区域（缓存空心数量={holes}，例如 {hole}），请先填补。"
   noPermission: "&c你没有权限执行此命令。"
   scanStart: "&7开始扫描断裂领地..."
   scanComplete: "&a扫描完成，断裂领地数量：{count}"

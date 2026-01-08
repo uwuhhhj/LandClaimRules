@@ -36,7 +36,7 @@ public final class PluginConfig {
         ));
         this.antiHollowDeniedMessage = colorize(config.getString(
                 "messages.antiHollowDenied",
-                "&cClaim denied: hollow areas exist (cached holes={holes}). Fill them first."
+                "&cClaim denied: hollow areas exist (cached holes={holes}, e.g. {hole}). Fill them first."
         ));
         this.noPermissionMessage = colorize(config.getString(
                 "messages.noPermission",
@@ -122,8 +122,11 @@ public final class PluginConfig {
         );
     }
 
-    public String formatAntiHollowDenied(int holes) {
-        return formatMessage(antiHollowDeniedMessage, "{holes}", Integer.toString(holes));
+    public String formatAntiHollowDenied(int holes, String hole) {
+        return formatMessage(antiHollowDeniedMessage,
+                "{holes}", Integer.toString(holes),
+                "{hole}", hole
+        );
     }
 
     public String formatNoPermission() {
