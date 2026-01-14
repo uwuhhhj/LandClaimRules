@@ -56,14 +56,16 @@ public final class AntiHollowClaimRule {
 
     public static final class Snapshot {
         private final HashSet<Long> claimed;
+        private final HashSet<Long> supplement;
         private final boolean empty;
         private final int minX;
         private final int maxX;
         private final int minZ;
         private final int maxZ;
 
-        private Snapshot(HashSet<Long> claimed, boolean empty, int minX, int maxX, int minZ, int maxZ) {
+        private Snapshot(HashSet<Long> claimed, HashSet<Long> supplement, boolean empty, int minX, int maxX, int minZ, int maxZ) {
             this.claimed = claimed;
+            this.supplement = supplement;
             this.empty = empty;
             this.minX = minX;
             this.maxX = maxX;
@@ -139,10 +141,11 @@ public final class AntiHollowClaimRule {
             }
         }
 
+        HashSet<Long> supplement = new HashSet<>();
         if (!first) {
             Nation nation = land.getNation();
             if (nation != null) {
-                // Treat same-nation claims inside this land's bounds as filled to avoid false hollow hits.
+                // Collect same-nation claims inside this land's bounds for later hole-filling.
                 for (Land member : nation.getLands()) {
                     if (member == land) {
                         continue;
@@ -155,14 +158,14 @@ public final class AntiHollowClaimRule {
                         int x = chunk.getX();
                         int z = chunk.getZ();
                         if (x >= minX && x <= maxX && z >= minZ && z <= maxZ) {
-                            claimed.add(pack(x, z));
+                            supplement.add(pack(x, z));
                         }
                     }
                 }
             }
         }
 
-        return new Snapshot(claimed, first, minX, maxX, minZ, maxZ);
+        return new Snapshot(claimed, supplement, first, minX, maxX, minZ, maxZ);
     }
 
     public void updateCache(CacheKey key, Snapshot snapshot) {
@@ -172,6 +175,12 @@ public final class AntiHollowClaimRule {
         }
 
         CacheEntry entry = computeHoles(snapshot.claimed, snapshot.minX, snapshot.maxX, snapshot.minZ, snapshot.maxZ);
+        if (entry.holes > 0 && snapshot.supplement != null && !snapshot.supplement.isEmpty()) {
+            HashSet<Long> merged = new HashSet<>(snapshot.claimed.size() + snapshot.supplement.size());
+            merged.addAll(snapshot.claimed);
+            merged.addAll(snapshot.supplement);
+            entry = computeHoles(merged, snapshot.minX, snapshot.maxX, snapshot.minZ, snapshot.maxZ);
+        }
         cache.put(key, entry);
     }
 
